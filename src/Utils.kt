@@ -27,3 +27,22 @@ fun <R> List<String>.parts(map: (List<String>) -> R): List<R> = buildList {
  * Converts string to md5 hash.
  */
 fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray())).toString(16)
+
+
+/**
+ * Swaps the elements at the given indices.
+ */
+fun <T> List<T>.withIndicesSwapped(index1: Int, index2: Int): List<T> {
+    if (index1 !in indices || index2 !in indices) {
+        throw IndexOutOfBoundsException("Indices $index1 $index2 must be within the bounds of the list.")
+    }
+    if (index1 == index2) return this // No swap needed if indices are the same
+
+    return mapIndexed { index, element ->
+        when (index) {
+            index1 -> this[index2]
+            index2 -> this[index1]
+            else -> element
+        }
+    }
+}
