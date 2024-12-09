@@ -29,3 +29,107 @@ inline fun CharArray2.toListOfP2If(predicate: (c: Char) -> Boolean): List<P2> = 
         if (predicate(c)) add(P2(i, j))
     }
 }
+
+
+enum class DiagonalDirection {
+    TOP_LEFT_TO_BOTTOM_RIGHT,
+    TOP_RIGHT_TO_BOTTOM_LEFT
+}
+
+/**
+ * For the input matrix:
+ *
+ * A B C
+ * D E F
+ * G H I
+ * The output would be:
+ *
+ * Top-Left to Bottom-Right Diagonals:
+ * A
+ * BD
+ * CEG
+ * FH
+ * I
+ *
+ * Top-Right to Bottom-Left Diagonals:
+ * C
+ * BF
+ * AEI
+ * DH
+ * G
+ */
+fun Array<CharArray>.diagonalGrouping(direction: DiagonalDirection): Array<CharArray> {
+    val rows = this.size
+    val cols = this[0].size
+    val diagonals = mutableListOf<MutableList<Char>>()
+
+    when (direction) {
+        DiagonalDirection.TOP_LEFT_TO_BOTTOM_RIGHT -> {
+            for (d in 0 until (rows + cols - 1)) {
+                val diagonal = mutableListOf<Char>()
+                for (i in 0 until rows) {
+                    val j = d - i
+                    if (j in 0 until cols) {
+                        diagonal.add(this[i][j])
+                    }
+                }
+                diagonals.add(diagonal)
+            }
+        }
+        DiagonalDirection.TOP_RIGHT_TO_BOTTOM_LEFT -> {
+            // Traverse diagonals based on i - j
+            for (d in -(cols - 1) until rows) {
+                val diagonal = mutableListOf<Char>()
+                for (i in 0 until rows) {
+                    val j = i - d
+                    if (j in 0 until cols) {
+                        diagonal.add(this[i][j])
+                    }
+                }
+                diagonals.add(diagonal)
+            }
+        }
+    }
+
+    return diagonals.map { it.toCharArray() }.toTypedArray()
+}
+
+fun CharArray2.transposed(): CharArray2 {
+    val rowCount = size
+    val colCount = firstOrNull()?.size ?: 0
+
+    val transposed = Array(colCount) { CharArray(rowCount) }
+
+    for (i in indices) {
+        for (j in get(i).indices) {
+            transposed[j][i] = get(i)[j]
+        }
+    }
+
+    return transposed
+}
+
+/**
+ * Applies the given [transform] function to each window of the specified [width] and [height] in the 2D array.
+ */
+fun<T> CharArray2.windowed(width: Int, height: Int, transform: (CharArray2) -> T): List<T>{
+    val rowCount = size
+    val colCount = firstOrNull()?.size ?: 0
+
+    if(width > colCount || height > rowCount) return emptyList()
+
+    val resultList = mutableListOf<T>()
+
+    for (i in 0..rowCount - height) {
+        for (j in 0..colCount - width) {
+            val window = Array(height) { y ->
+                CharArray(width) { x ->
+                    get(i + y)[j + x]
+                }
+            }
+            resultList.add((transform(window)))
+        }
+    }
+
+    return resultList
+}
